@@ -6,5 +6,4 @@ public class HW1P3 {
 		// TODO Auto-generated method stub
 
 	}
-
 }
