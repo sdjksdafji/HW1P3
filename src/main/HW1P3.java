@@ -29,14 +29,12 @@ public class HW1P3 {
 
 	public static void main(String[] args) {
 		System.out.println("Author: Shuyi Wang\nNetId:sw773");
-		// testBooks = readBooksFromFile("books.test");
-		trainBooks = readBooksFromFile("books.train");
-		// System.out.println(testBooks.size());
+		testBooks = readBooksFromFile("books.test");
+		//trainBooks = readBooksFromFile("books.train");
 		System.out.println(trainBooks.size());
 		System.out.println(WordCount.maxId);
 		//partA();
-		ArrayList<Book> centroids = calculateCentroids(trainBooks);
-		System.out.println(centroids.size());
+		partB(testBooks);
 	}
 
 	@SuppressWarnings({ "unchecked", "resource" })
@@ -161,6 +159,46 @@ public class HW1P3 {
 			centroids.add(centroidBook);
 		}
 		return centroids;
+	}
+	
+	public static void partB(ArrayList<Book> books) {
+		long n = 0;
+		long correctPrediction = 0;
+		long[] nyCorrectPredict = new long[NUM_CATEGORIES];
+		long[] nyPredict = new long[NUM_CATEGORIES];
+		long[] nyTrue = new long[NUM_CATEGORIES];
+		for (int i = 0; i < NUM_CATEGORIES; i++) {
+			nyCorrectPredict[i] = 0;
+			nyPredict[i] = 0;
+			nyTrue[i] = 0;
+		}
+
+		ArrayList<Book> centroids = calculateCentroids(books);
+
+		for (Book book : books) {
+			book.predictClass(centroids);
+
+			if (book.getWordCounts().size() == 0) {
+				continue;
+			}
+
+			n++;
+			nyPredict[book.getPredictedCategory()]++;
+			nyTrue[book.getCategory()]++;
+			if (book.getCategory() == book.getPredictedCategory()) {
+				correctPrediction++;
+				nyCorrectPredict[book.getCategory()]++;
+			}
+		}
+
+		System.out.println("\n\nBase Line: " + correctPrediction + "  out of "
+				+ n + "; equals to " + (100.0 * correctPrediction / n));
+		for (int i = 0; i < NUM_CATEGORIES; i++) {
+			System.out.println("\nFor category " + i + ": Precision:"
+					+ (100.0 * nyCorrectPredict[i] / nyPredict[i]));
+			System.out.println("Recall:"
+					+ (100.0 * nyCorrectPredict[i] / nyTrue[i]));
+		}
 	}
 
 }

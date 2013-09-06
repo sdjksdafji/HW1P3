@@ -119,5 +119,20 @@ public class Book {
 		return this.dotProduct(book)
 				/ (this.getEuclideanLength() * book.getEuclideanLength());
 	}
+	
+	public void predictClass(ArrayList<Book> centroids){
+		double maxCosSim = -1.0; 
+		Book closestCentroid = null;
+		for(Book centroid:centroids){
+			double cosSim = this.cosineSimilarity(centroid);
+			if(cosSim > maxCosSim){
+				maxCosSim = cosSim;
+				closestCentroid = centroid;
+			}
+		}
+		if(maxCosSim>0){
+			this.setPredictedCategory(closestCentroid.getCategory());
+		}
+	}
 
 }
