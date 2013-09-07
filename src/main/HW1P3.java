@@ -18,6 +18,7 @@ public class HW1P3 {
 	private static ArrayList<Book> testBooks = new ArrayList<Book>();
 	private static ArrayList<Book> trainBooks = new ArrayList<Book>();
 	private static final int NUM_CATEGORIES = 5;
+	private static int idCount = 1;
 
 	/*
 	 * 
@@ -30,11 +31,14 @@ public class HW1P3 {
 	public static void main(String[] args) {
 		System.out.println("Author: Shuyi Wang\nNetId:sw773");
 		testBooks = readBooksFromFile("books.test");
-		//trainBooks = readBooksFromFile("books.train");
+		trainBooks = readBooksFromFile("books.train");
+		Book.initDynamicProgramming(idCount);
 		System.out.println(trainBooks.size());
 		System.out.println(WordCount.maxId);
 		//partA();
-		partB(testBooks);
+//		partB(testBooks);
+		partC(trainBooks,testBooks);
+//		System.out.println(kNN(trainBooks,testBooks,1));
 	}
 
 	@SuppressWarnings({ "unchecked", "resource" })
@@ -54,7 +58,6 @@ public class HW1P3 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		int id = 1;
 		while (in != null && in.hasNextLine()) {
 			lineTokenizer = new Scanner(in.nextLine()).useDelimiter(" |:");
 			int category = lineTokenizer.nextInt();
@@ -69,13 +72,12 @@ public class HW1P3 {
 				}
 			}
 			Collections.sort(wordCounts);
-			Book newBook = new Book(id, category, -1, wordCounts);
+			Book newBook = new Book(idCount++, category, -1, wordCounts);
 			String title = titleIn.next();
 			title = title.replace("\n", "").replace("\r", "");
 			newBook.setTitle(title);
 			books.add(newBook);
 			lineTokenizer.close();
-			id++;
 		}
 		in.close();
 		System.out.println("File Read: " + filename);
@@ -199,6 +201,62 @@ public class HW1P3 {
 			System.out.println("Recall:"
 					+ (100.0 * nyCorrectPredict[i] / nyTrue[i]));
 		}
+	}
+	
+	public static void partC(ArrayList<Book> trainBooks,
+			ArrayList<Book> testBooks) {
+		int[] k = { 1, 2, 5, 10, 100, 200, 300, 500, 1000, 2000, 3000, 4000, 5000 };
+		for(int i=0;i<k.length;i++){
+			double accuracy = kNN(trainBooks,testBooks,k[i]);
+			System.out.print("\nWhen k = "+k[i]+": Accuracy is ");
+			System.out.println(accuracy);
+		}
+	}
+	
+	public static double kNN(ArrayList<Book> trainBooks,
+			ArrayList<Book> testBooks, int k) {
+		ArrayList<Book> books = new ArrayList<Book>();
+		books.addAll(trainBooks);
+		books.addAll(testBooks);
+		
+		int correctPrediction = 0;
+		int n=0;
+
+		for (Book book : books) {
+			PriorityQueue<SimAndBook> priorityQueue = new PriorityQueue<SimAndBook>();
+			for (Book trainBook : books) {
+				if (book.getId() == trainBook.getId()) {
+					continue;
+				}
+				priorityQueue.add(new SimAndBook(book
+						.cosineSimilarity(trainBook), trainBook));
+			}
+			int[] count = new int[NUM_CATEGORIES];
+			for (int i = 0; i < NUM_CATEGORIES; i++)
+				count[i] = 0;
+			for (int i = 0; i < k; i++) {
+				SimAndBook t = priorityQueue.poll();
+				count[t.getBook().getCategory()]++;
+			}
+			int max=-1;
+			int prediction=-1;
+			for(int i=0;i<NUM_CATEGORIES;i++){
+				if(count[i]>max){
+					prediction = i;
+					max = count[i];
+				}
+			}
+			if(prediction==-1)System.err.println("error");
+			book.setPredictedCategory(prediction);
+			
+			if(n%1000==0)System.out.println(n);
+			n++;
+			if(book.getCategory()==book.getPredictedCategory()){
+				correctPrediction++;
+			}
+		}
+		double accuracy = 100.0 * correctPrediction / n;
+		return accuracy;
 	}
 
 }
