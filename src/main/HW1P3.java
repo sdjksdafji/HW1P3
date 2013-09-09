@@ -9,7 +9,10 @@ import java.util.PriorityQueue;
 import java.util.Scanner;
 import java.util.TreeMap;
 
+import javax.swing.JFrame;
+
 import pojo.Book;
+import pojo.GraphingData;
 import pojo.SimAndBook;
 import pojo.WordCount;
 
@@ -37,7 +40,9 @@ public class HW1P3 {
 		System.out.println(WordCount.maxId);
 		partA();
 		partB(testBooks);
-		partC(trainBooks, testBooks);
+		int bestK = partC(trainBooks, testBooks);
+		partD(bestK);
+		partE(5000);
 		// System.out.println(kNN(trainBooks,testBooks,1));
 	}
 
@@ -207,15 +212,30 @@ public class HW1P3 {
 		}
 	}
 
-	public static void partC(ArrayList<Book> trainBooks,
+	public static int partC(ArrayList<Book> trainBooks,
 			ArrayList<Book> testBooks) {
 		int[] k = { 1, 2, 5, 10, 100, 200, 300, 500, 1000, 2000, 3000, 4000,
 				5000 };
+		int[] accuracyList = new int[k.length];
+		int bestK = -1;
+		double bestAccuracy = -1.0;
 		for (int i = 0; i < k.length; i++) {
 			double accuracy = kNN(trainBooks, testBooks, k[i]);
+			accuracyList[i] = (int) accuracy;
+			if (accuracy > bestAccuracy) {
+				bestAccuracy = accuracy;
+				bestK = i;
+			}
 			System.out.print("\nWhen k = " + k[i] + ": Accuracy is ");
 			System.out.println(accuracy);
 		}
+		JFrame f = new JFrame();
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f.add(new GraphingData(accuracyList));
+		f.setSize(400, 400);
+		f.setLocation(200, 200);
+		f.setVisible(true);
+		return bestK;
 	}
 
 	public static double kNN(ArrayList<Book> trainBooks,
@@ -240,6 +260,9 @@ public class HW1P3 {
 			for (int i = 0; i < NUM_CATEGORIES; i++)
 				count[i] = 0;
 			for (int i = 0; i < k; i++) {
+				if(priorityQueue.isEmpty()){
+					break;
+				}
 				SimAndBook t = priorityQueue.poll();
 				count[t.getBook().getCategory()]++;
 			}
@@ -264,6 +287,61 @@ public class HW1P3 {
 		}
 		double accuracy = 100.0 * correctPrediction / n;
 		return accuracy;
+	}
+	
+	public static void partD(int bestK){
+		kNN(trainBooks, testBooks, bestK);
+		System.out.println("\n\n Best accuracy occurs when k = "+bestK);
+		getPrecisionAndRecall();
+	}
+	
+	private static void getPrecisionAndRecall(){
+		double[] precisionAndRecall = new double[2*NUM_CATEGORIES];
+		
+		ArrayList<Book> books = new ArrayList<Book>();
+		books.addAll(trainBooks);
+		books.addAll(testBooks);
+		
+		long n = 0;
+		long correctPrediction = 0;
+		long[] nyCorrectPredict = new long[NUM_CATEGORIES];
+		long[] nyPredict = new long[NUM_CATEGORIES];
+		long[] nyTrue = new long[NUM_CATEGORIES];
+		for (int i = 0; i < NUM_CATEGORIES; i++) {
+			nyCorrectPredict[i] = 0;
+			nyPredict[i] = 0;
+			nyTrue[i] = 0;
+		}
+
+		for (Book book : books) {
+
+			if (book.getWordCounts().size() == 0) {
+				continue;
+			}
+
+			n++;
+			nyPredict[book.getPredictedCategory()]++;
+			nyTrue[book.getCategory()]++;
+			if (book.getCategory() == book.getPredictedCategory()) {
+				correctPrediction++;
+				nyCorrectPredict[book.getCategory()]++;
+			}
+		}
+
+		System.out.println("\n\nBase Line: " + correctPrediction + "  out of "
+				+ n + "; equals to " + (100.0 * correctPrediction / n));
+		for (int i = 0; i < NUM_CATEGORIES; i++) {
+			System.out.println("\nFor category " + i + ": Precision:"
+					+ (100.0 * nyCorrectPredict[i] / nyPredict[i]));
+			System.out.println("Recall:"
+					+ (100.0 * nyCorrectPredict[i] / nyTrue[i]));
+		}
+		
+		
+	}
+	
+	public static void partE(int k){
+		partD(k);
 	}
 
 }

@@ -127,6 +127,9 @@ public class Book {
 	}
 
 	public double cosineSimilarity(Book book) {// System.out.println(this.dotProduct(book)+"  "+book.getEuclideanLength());
+		if(this.getWordCounts().size() == 0 || book.getWordCounts().size()==0){
+			return 0.0;
+		}
 		if (dp == null
 				|| dp[this.getId() <= book.getId() ? this.getId() : book
 						.getId()][this.getId() <= book.getId() ? book.getId()

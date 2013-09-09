@@ -6,11 +6,17 @@ import java.awt.geom.*;
 import javax.swing.*;
  
 public class GraphingData extends JPanel {
-    int[] data = {
+    private int[] data = {
         21, 14, 18, 03, 86, 88, 74, 87, 54, 77,
         61, 55, 48, 60, 49, 36, 38, 27, 20, 18
     };
-    final int PAD = 20;
+    
+    public GraphingData(int[] data) {
+		super();
+		this.data = data;
+	}
+
+	final int PAD = 20;
  
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
