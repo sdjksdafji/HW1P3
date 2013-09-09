@@ -70,6 +70,14 @@ public class Book {
 		this.title = title;
 	}
 
+	@Override
+	public String toString() {
+		return "Book [id=" + id + ", category=" + category
+				+ ", predictedCategory=" + predictedCategory + ", wordCounts="
+				+ wordCounts + ", euclideanLength=" + euclideanLength
+				+ ", title=" + title + "]";
+	}
+
 	public double getEuclideanLength() {
 		if (euclideanLength < 0.0) {
 			long temp = 0;

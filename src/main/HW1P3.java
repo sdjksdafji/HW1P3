@@ -30,15 +30,15 @@ public class HW1P3 {
 
 	public static void main(String[] args) {
 		System.out.println("Author: Shuyi Wang\nNetId:sw773");
-		testBooks = readBooksFromFile("books.test");
 		trainBooks = readBooksFromFile("books.train");
-		Book.initDynamicProgramming(idCount);
+		testBooks = readBooksFromFile("books.test");
+		Book.initDynamicProgramming(idCount + NUM_CATEGORIES);
 		System.out.println(trainBooks.size());
 		System.out.println(WordCount.maxId);
-		//partA();
-//		partB(testBooks);
-		partC(trainBooks,testBooks);
-//		System.out.println(kNN(trainBooks,testBooks,1));
+		partA();
+		partB(testBooks);
+		partC(trainBooks, testBooks);
+		// System.out.println(kNN(trainBooks,testBooks,1));
 	}
 
 	@SuppressWarnings({ "unchecked", "resource" })
@@ -46,7 +46,7 @@ public class HW1P3 {
 		ArrayList<Book> books = new ArrayList<Book>();
 		System.out.println("Reading File: " + filename);
 		File file = new File(filename);
-		File titleFile = new File(filename+".titles");
+		File titleFile = new File(filename + ".titles");
 		Scanner in = null;
 		Scanner titleIn = null;
 		Scanner lineTokenizer = null;
@@ -81,7 +81,7 @@ public class HW1P3 {
 		}
 		in.close();
 		System.out.println("File Read: " + filename);
-		
+
 		return books;
 	}
 
@@ -110,59 +110,63 @@ public class HW1P3 {
 				pqBrain.add(new SimAndBook(book.cosineSimilarity(Brain), book));
 			}
 		}
-		System.out.println("\n\nBooks similar to "+FSG.getTitle()+"\n");
-		for(int i=0;i<10;i++){
-			SimAndBook t =pqFSG.poll();
-			System.out.println(t.getBook().getTitle()+"   :   "+t.getCosineSimilarity());
+		System.out.println("\n\nBooks similar to " + FSG.getTitle() + "\n");
+		for (int i = 0; i < 10; i++) {
+			SimAndBook t = pqFSG.poll();
+			System.out.println(t.getBook().getTitle() + "   :   "
+					+ t.getCosineSimilarity());
 		}
-		System.out.println("\n\nBooks similar to "+Brain.getTitle());
-		for(int i=0;i<10;i++){
-			SimAndBook t =pqBrain.poll();
-			System.out.println(t.getBook().getTitle()+"   :   "+t.getCosineSimilarity());
+		System.out.println("\n\nBooks similar to " + Brain.getTitle());
+		for (int i = 0; i < 10; i++) {
+			SimAndBook t = pqBrain.poll();
+			System.out.println(t.getBook().getTitle() + "   :   "
+					+ t.getCosineSimilarity());
 		}
 		System.out.println("done!");
 	}
-	
-	public static ArrayList<Book> calculateCentroids(ArrayList<Book> books){
-		ArrayList<ArrayList<Book>> category = new ArrayList<ArrayList<Book>> ();
+
+	public static ArrayList<Book> calculateCentroids(ArrayList<Book> books) {
+		ArrayList<ArrayList<Book>> category = new ArrayList<ArrayList<Book>>();
 		ArrayList<Book> centroids = new ArrayList<Book>();
-		for(int i=0;i<NUM_CATEGORIES;i++){
-			category.add(new ArrayList<Book>()); 
+		for (int i = 0; i < NUM_CATEGORIES; i++) {
+			category.add(new ArrayList<Book>());
 		}
-		for(Book book:books){
-			if(book.getCategory()<0 || book.getCategory()>=NUM_CATEGORIES || category.size()!=NUM_CATEGORIES){
+		for (Book book : books) {
+			if (book.getCategory() < 0 || book.getCategory() >= NUM_CATEGORIES
+					|| category.size() != NUM_CATEGORIES) {
 				System.err.println("Category does not match assumption");
 				return null;
 			}
 			category.get(book.getCategory()).add(book);
 		}
-		for(int i=0;i<NUM_CATEGORIES;i++){
-			TreeMap<Integer,Integer> centroid = new TreeMap<Integer,Integer>();
-			for(Book book:category.get(i)){
-				for(WordCount count:book.getWordCounts()){
-					if(!centroid.containsKey(count.getWordId())){
+		for (int i = 0; i < NUM_CATEGORIES; i++) {
+			TreeMap<Integer, Integer> centroid = new TreeMap<Integer, Integer>();
+			for (Book book : category.get(i)) {
+				for (WordCount count : book.getWordCounts()) {
+					if (!centroid.containsKey(count.getWordId())) {
 						centroid.put(count.getWordId(), 0);
 					}
 					int temp = centroid.get(count.getWordId());
-					temp+=count.getCount();
+					temp += count.getCount();
 					centroid.put(count.getWordId(), temp);
 				}
 			}
-			
+
 			Book centroidBook = new Book();
+			centroidBook.setId(idCount++);
 			centroidBook.setCategory(i);
 			ArrayList<WordCount> wordCounts = new ArrayList<WordCount>();
-			for (Map.Entry<Integer, Integer> entry : centroid.entrySet()){
+			for (Map.Entry<Integer, Integer> entry : centroid.entrySet()) {
 				int wordId = entry.getKey();
 				int count = entry.getValue();
-				wordCounts.add(new WordCount(wordId,count));
+				wordCounts.add(new WordCount(wordId, count));
 			}
 			centroidBook.setWordCounts(wordCounts);
 			centroids.add(centroidBook);
 		}
 		return centroids;
 	}
-	
+
 	public static void partB(ArrayList<Book> books) {
 		long n = 0;
 		long correctPrediction = 0;
@@ -202,25 +206,26 @@ public class HW1P3 {
 					+ (100.0 * nyCorrectPredict[i] / nyTrue[i]));
 		}
 	}
-	
+
 	public static void partC(ArrayList<Book> trainBooks,
 			ArrayList<Book> testBooks) {
-		int[] k = { 1, 2, 5, 10, 100, 200, 300, 500, 1000, 2000, 3000, 4000, 5000 };
-		for(int i=0;i<k.length;i++){
-			double accuracy = kNN(trainBooks,testBooks,k[i]);
-			System.out.print("\nWhen k = "+k[i]+": Accuracy is ");
+		int[] k = { 1, 2, 5, 10, 100, 200, 300, 500, 1000, 2000, 3000, 4000,
+				5000 };
+		for (int i = 0; i < k.length; i++) {
+			double accuracy = kNN(trainBooks, testBooks, k[i]);
+			System.out.print("\nWhen k = " + k[i] + ": Accuracy is ");
 			System.out.println(accuracy);
 		}
 	}
-	
+
 	public static double kNN(ArrayList<Book> trainBooks,
 			ArrayList<Book> testBooks, int k) {
 		ArrayList<Book> books = new ArrayList<Book>();
 		books.addAll(trainBooks);
 		books.addAll(testBooks);
-		
+
 		int correctPrediction = 0;
-		int n=0;
+		int n = 0;
 
 		for (Book book : books) {
 			PriorityQueue<SimAndBook> priorityQueue = new PriorityQueue<SimAndBook>();
@@ -238,20 +243,22 @@ public class HW1P3 {
 				SimAndBook t = priorityQueue.poll();
 				count[t.getBook().getCategory()]++;
 			}
-			int max=-1;
-			int prediction=-1;
-			for(int i=0;i<NUM_CATEGORIES;i++){
-				if(count[i]>max){
+			int max = -1;
+			int prediction = -1;
+			for (int i = 0; i < NUM_CATEGORIES; i++) {
+				if (count[i] > max) {
 					prediction = i;
 					max = count[i];
 				}
 			}
-			if(prediction==-1)System.err.println("error");
+			if (prediction == -1)
+				System.err.println("error");
 			book.setPredictedCategory(prediction);
-			
-			if(n%1000==0)System.out.println(n);
+
+			if (n % 1000 == 0)
+				System.out.println(n);
 			n++;
-			if(book.getCategory()==book.getPredictedCategory()){
+			if (book.getCategory() == book.getPredictedCategory()) {
 				correctPrediction++;
 			}
 		}
