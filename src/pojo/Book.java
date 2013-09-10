@@ -80,19 +80,19 @@ public class Book {
 
 	public double getEuclideanLength() {
 		if (euclideanLength < 0.0) {
-			long temp = 0;
+			double temp = 0;
 			euclideanLength = 0;
 			for (WordCount wordCount : this.wordCounts) {
-				temp += wordCount.getCount() * wordCount.getCount();
+				temp += (double)wordCount.getCount() * wordCount.getCount();
 			}
-			euclideanLength = (double) temp;
+			euclideanLength = temp;
 			euclideanLength=Math.sqrt(euclideanLength);
 		}
 		return euclideanLength;
 	}
 
 	public double dotProduct(Book book) {
-		long dotProduct = 0;
+		double dotProduct = 0;
 		Iterator<WordCount> x1 = this.getWordCounts().iterator();
 		Iterator<WordCount> x2 = book.getWordCounts().iterator();
 		WordCount nextX1, nextX2;
@@ -103,22 +103,22 @@ public class Book {
 		nextX2 = x2.next();
 		while (true) {
 			if (nextX1.getWordId() == nextX2.getWordId()) {
-				dotProduct += nextX1.getCount() * nextX2.getCount();
+				dotProduct += (double)nextX1.getCount() * (double)nextX2.getCount();
 				if (!x1.hasNext() || !x2.hasNext()) {
-					return (double)dotProduct;
+					return dotProduct;
 				} else {
 					nextX1 = x1.next();
 					nextX2 = x2.next();
 				}
 			} else if (nextX1.getWordId() > nextX2.getWordId()) {
 				if (!x2.hasNext()) {
-					return (double)dotProduct;
+					return dotProduct;
 				} else {
 					nextX2 = x2.next();
 				}
 			} else {
 				if (!x1.hasNext()) {
-					return (double)dotProduct;
+					return dotProduct;
 				} else {
 					nextX1 = x1.next();
 				}

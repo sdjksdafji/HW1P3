@@ -41,9 +41,6 @@ public class HW1P3 {
 		partA();
 		partB(testBooks);
 		int bestK = partC(trainBooks, testBooks);
-		partD(bestK);
-		partE(5000);
-		// System.out.println(kNN(trainBooks,testBooks,1));
 	}
 
 	@SuppressWarnings({ "unchecked", "resource" })
@@ -145,13 +142,13 @@ public class HW1P3 {
 			category.get(book.getCategory()).add(book);
 		}
 		for (int i = 0; i < NUM_CATEGORIES; i++) {
-			TreeMap<Integer, Integer> centroid = new TreeMap<Integer, Integer>();
+			TreeMap<Integer, Long> centroid = new TreeMap<Integer, Long>();
 			for (Book book : category.get(i)) {
 				for (WordCount count : book.getWordCounts()) {
 					if (!centroid.containsKey(count.getWordId())) {
-						centroid.put(count.getWordId(), 0);
+						centroid.put(count.getWordId(), (long)0);
 					}
-					int temp = centroid.get(count.getWordId());
+					long temp = centroid.get(count.getWordId());
 					temp += count.getCount();
 					centroid.put(count.getWordId(), temp);
 				}
@@ -161,9 +158,9 @@ public class HW1P3 {
 			centroidBook.setId(idCount++);
 			centroidBook.setCategory(i);
 			ArrayList<WordCount> wordCounts = new ArrayList<WordCount>();
-			for (Map.Entry<Integer, Integer> entry : centroid.entrySet()) {
+			for (Map.Entry<Integer, Long> entry : centroid.entrySet()) {
 				int wordId = entry.getKey();
-				int count = entry.getValue();
+				long count = entry.getValue();
 				wordCounts.add(new WordCount(wordId, count));
 			}
 			centroidBook.setWordCounts(wordCounts);
@@ -224,7 +221,7 @@ public class HW1P3 {
 			accuracyList[i] = (int) accuracy;
 			if (accuracy > bestAccuracy) {
 				bestAccuracy = accuracy;
-				bestK = i;
+				bestK = k[i];
 			}
 			System.out.print("\nWhen k = " + k[i] + ": Accuracy is ");
 			System.out.println(accuracy);
@@ -244,8 +241,16 @@ public class HW1P3 {
 		books.addAll(trainBooks);
 		books.addAll(testBooks);
 
-		int correctPrediction = 0;
-		int n = 0;
+		long n = 0;
+		long correctPrediction = 0;
+		long[] nyCorrectPredict = new long[NUM_CATEGORIES];
+		long[] nyPredict = new long[NUM_CATEGORIES];
+		long[] nyTrue = new long[NUM_CATEGORIES];
+		for (int i = 0; i < NUM_CATEGORIES; i++) {
+			nyCorrectPredict[i] = 0;
+			nyPredict[i] = 0;
+			nyTrue[i] = 0;
+		}
 
 		for (Book book : books) {
 			PriorityQueue<SimAndBook> priorityQueue = new PriorityQueue<SimAndBook>();
@@ -280,45 +285,7 @@ public class HW1P3 {
 
 			if (n % 1000 == 0)
 				System.out.println(n);
-			n++;
-			if (book.getCategory() == book.getPredictedCategory()) {
-				correctPrediction++;
-			}
-		}
-		double accuracy = 100.0 * correctPrediction / n;
-		return accuracy;
-	}
-	
-	public static void partD(int bestK){
-		kNN(trainBooks, testBooks, bestK);
-		System.out.println("\n\n Best accuracy occurs when k = "+bestK);
-		getPrecisionAndRecall();
-	}
-	
-	private static void getPrecisionAndRecall(){
-		double[] precisionAndRecall = new double[2*NUM_CATEGORIES];
-		
-		ArrayList<Book> books = new ArrayList<Book>();
-		books.addAll(trainBooks);
-		books.addAll(testBooks);
-		
-		long n = 0;
-		long correctPrediction = 0;
-		long[] nyCorrectPredict = new long[NUM_CATEGORIES];
-		long[] nyPredict = new long[NUM_CATEGORIES];
-		long[] nyTrue = new long[NUM_CATEGORIES];
-		for (int i = 0; i < NUM_CATEGORIES; i++) {
-			nyCorrectPredict[i] = 0;
-			nyPredict[i] = 0;
-			nyTrue[i] = 0;
-		}
-
-		for (Book book : books) {
-
-			if (book.getWordCounts().size() == 0) {
-				continue;
-			}
-
+			
 			n++;
 			nyPredict[book.getPredictedCategory()]++;
 			nyTrue[book.getCategory()]++;
@@ -327,7 +294,7 @@ public class HW1P3 {
 				nyCorrectPredict[book.getCategory()]++;
 			}
 		}
-
+		
 		System.out.println("\n\nBase Line: " + correctPrediction + "  out of "
 				+ n + "; equals to " + (100.0 * correctPrediction / n));
 		for (int i = 0; i < NUM_CATEGORIES; i++) {
@@ -338,10 +305,65 @@ public class HW1P3 {
 		}
 		
 		
+		
+		double accuracy = 100.0 * correctPrediction / n;
+		return accuracy;
 	}
 	
-	public static void partE(int k){
-		partD(k);
-	}
+//	public static void partD(int bestK) {
+//		double accuracy = kNN(trainBooks, testBooks, bestK);
+//		System.out.println("\n\n Best accuracy occurs when k = " + bestK);
+//		System.out.println("accuracy = " + accuracy);
+//		getPrecisionAndRecall();
+//	}
+//
+//	private static void getPrecisionAndRecall(){
+////		double[] precisionAndRecall = new double[2*NUM_CATEGORIES];
+//		
+//		ArrayList<Book> books = new ArrayList<Book>();
+//		books.addAll(trainBooks);
+//		books.addAll(testBooks);
+//		
+//		long n = 0;
+//		long correctPrediction = 0;
+//		long[] nyCorrectPredict = new long[NUM_CATEGORIES];
+//		long[] nyPredict = new long[NUM_CATEGORIES];
+//		long[] nyTrue = new long[NUM_CATEGORIES];
+//		for (int i = 0; i < NUM_CATEGORIES; i++) {
+//			nyCorrectPredict[i] = 0;
+//			nyPredict[i] = 0;
+//			nyTrue[i] = 0;
+//		}
+//
+//		for (Book book : books) {
+//
+//			if (book.getWordCounts().size() == 0) {
+//				continue;
+//			}
+//
+//			n++;
+//			nyPredict[book.getPredictedCategory()]++;
+//			nyTrue[book.getCategory()]++;
+//			if (book.getCategory() == book.getPredictedCategory()) {
+//				correctPrediction++;
+//				nyCorrectPredict[book.getCategory()]++;
+//			}
+//		}
+//
+//		System.out.println("\n\nBase Line: " + correctPrediction + "  out of "
+//				+ n + "; equals to " + (100.0 * correctPrediction / n));
+//		for (int i = 0; i < NUM_CATEGORIES; i++) {
+//			System.out.println("\nFor category " + i + ": Precision:"
+//					+ (100.0 * nyCorrectPredict[i] / nyPredict[i]));
+//			System.out.println("Recall:"
+//					+ (100.0 * nyCorrectPredict[i] / nyTrue[i]));
+//		}
+//		
+//		
+//	}
+//	
+//	public static void partE(int k){
+//		partD(k);
+//	}
 
 }

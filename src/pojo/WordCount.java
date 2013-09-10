@@ -3,9 +3,9 @@ package pojo;
 public class WordCount implements Comparable {
 	public static int maxId = 0;
 	private int wordId;
-	private int count;
+	private long count;
 
-	public WordCount(int wordId, int count) {
+	public WordCount(int wordId, long count) {
 		super();
 		this.wordId = wordId;
 		if (wordId > maxId)
@@ -21,11 +21,11 @@ public class WordCount implements Comparable {
 		this.wordId = wordId;
 	}
 
-	public int getCount() {
+	public long getCount() {
 		return count;
 	}
 
-	public void setCount(int count) {
+	public void setCount(long count) {
 		this.count = count;
 	}
 
